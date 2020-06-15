@@ -1,0 +1,48 @@
+[app/ui]
+version = 8.0.4
+modtime = 1591653780.247055000
+
+[app/launcher]
+version = 8.0.4
+modtime = 1591653780.250590000
+
+[]
+access = read : [ * ], write : [ admin, power ]
+export = none
+version = 8.0.4
+modtime = 1591655840.176259000
+
+[inputs/monitor%3A%2F%2F%2FApplications%2FSplunk%2Fetc%2Fapps%2FOSI_PI%2Flogs%2F1STG-GA03124.csv]
+owner = admin
+version = 8.0.4
+modtime = 1591656092.940102000
+
+[app/install/install_source_checksum]
+version = 8.0.4
+modtime = 1592262940.230803000
+
+[props/pi%3Areadings/LOOKUP-pi_tags_lookup]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+version = 8.0.4
+modtime = 1592244190.158900000
+
+[lookups/pi_tags_lookup.csv]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = admin
+version = 8.0.4
+modtime = 1592244963.510793000
+
+[transforms/pi_tags_lookup]
+access = read : [ * ], write : [ admin, power ]
+export = system
+owner = nobody
+version = 8.0.4
+modtime = 1592246884.637788000
+
+[views/pse_osipi_poc]
+owner = admin
+version = 8.0.4
+modtime = 1592262746.927014000

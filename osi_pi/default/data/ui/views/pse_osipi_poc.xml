@@ -1,0 +1,88 @@
+<form>
+  <label>Generation Tag Review</label>
+  <fieldset submitButton="true" autoRun="false">
+    <input type="multiselect" token="facility_tok">
+      <label>Facility</label>
+      <choice value="*">All</choice>
+      <initialValue>*</initialValue>
+      <valuePrefix>Tag="</valuePrefix>
+      <valueSuffix>*"</valueSuffix>
+      <fieldForLabel>facility_code</fieldForLabel>
+      <fieldForValue>facility_code</fieldForValue>
+      <search>
+        <query>|  inputlookup pi_tags_lookup.csv
+| rex field=Tag "(?&lt;facility_code&gt;.{4})-[A-z0-9]{4}"
+| dedup facility_code sortby facility_code
+| fields facility_code</query>
+        <earliest>-24h@h</earliest>
+        <latest>now</latest>
+      </search>
+      <delimiter>  OR </delimiter>
+    </input>
+    <input type="multiselect" token="tagName_tok" searchWhenChanged="false">
+      <label>Tag Name</label>
+      <search>
+        <query>|  inputlookup pi_tags_lookup.csv
+
+| search $facility_tok$
+|  dedup Tag sortby Tag
+| fields Tag</query>
+      </search>
+      <delimiter> OR  </delimiter>
+      <fieldForLabel>Tag</fieldForLabel>
+      <fieldForValue>Tag</fieldForValue>
+      <valuePrefix>tag_name="</valuePrefix>
+      <valueSuffix>"</valueSuffix>
+      <default>1WTD-FIT002</default>
+    </input>
+    <input type="time" token="time_tok">
+      <label>Time Period</label>
+      <default>
+        <earliest>1560405600</earliest>
+        <latest>1560578400</latest>
+      </default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Tag Information</title>
+      <table>
+        <search>
+          <query>|  inputlookup pi_tags_lookup.csv
+| eval tag_type=CASE(
+isnull(Exdesc), "Telemetry",
+match(Exdesc, "Event=.*"), "Calculated",
+1=1, "Unknown")
+| eval calculation_field=if(tag_type="Calculated", Exdesc, "") 
+|  eval tag_name=Tag
+| search $tagName_tok$
+|  table Tag,Descriptor,Span,Zero,Units,tag_type,calculation_field
+| rename span as "Upper Limit", Zero as "Lower Limit", tag_type as Type, calculation_field as Calculation</query>
+          <earliest>$time_tok.earliest$</earliest>
+          <latest>$time_tok.latest$</latest>
+        </search>
+        <option name="count">10</option>
+        <option name="drilldown">none</option>
+        <option name="refresh.display">progressbar</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <chart>
+        <title>Values</title>
+        <search>
+          <query>index="osi_pi" $tagName_tok$
+| chart avg(tag_value) as value by _time,tag_name</query>
+          <earliest>$time_tok.earliest$</earliest>
+          <latest>$time_tok.latest$</latest>
+        </search>
+        <option name="charting.chart">area</option>
+        <option name="charting.chart.nullValueMode">zero</option>
+        <option name="charting.drilldown">none</option>
+        <option name="charting.layout.splitSeries">1</option>
+        <option name="refresh.display">progressbar</option>
+      </chart>
+    </panel>
+  </row>
+</form>
